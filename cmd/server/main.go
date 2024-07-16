@@ -25,7 +25,7 @@ func main() {
 		fmt.Printf("Could not start TCP Listener. Error: %v", err.Error())
 		return
 	}
-	fmt.Printf("Starting server on port %s", address)
+	fmt.Printf("Starting server on port %s\n", address)
 	err = server.Serve(conn)
 	if err != nil {
 		fmt.Printf("Could not start gRPC service. Error: %v", err.Error())
