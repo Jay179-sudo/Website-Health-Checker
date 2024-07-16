@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"jaypd/healthcheck/rpc"
 	service "jaypd/healthcheck/url-service"
+	"log/slog"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
+)
+
+var (
+	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 )
 
 func main() {
@@ -22,13 +28,14 @@ func main() {
 
 	conn, err := net.Listen("tcp", address)
 	if err != nil {
-		fmt.Printf("Could not start TCP Listener. Error: %v", err.Error())
+		logger.Error("Server", "Error", err.Error())
 		return
 	}
-	fmt.Printf("Starting server on port %s\n", address)
+	logger.Info("Server", "Started at address", address)
 	err = server.Serve(conn)
 	if err != nil {
-		fmt.Printf("Could not start gRPC service. Error: %v", err.Error())
+		logger.Error("Server", "Error", err.Error())
+		return
 	}
 
 }

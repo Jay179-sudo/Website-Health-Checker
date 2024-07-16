@@ -5,9 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"jaypd/healthcheck/rpc"
+	"log/slog"
+	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+)
+
+var (
+	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 )
 
 func main() {
@@ -17,7 +23,7 @@ func main() {
 
 	conn, err := grpc.NewClient(*address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		fmt.Printf("Could not start gRPC client. Error %v", err)
+		logger.Error("Client", "Error", err.Error())
 		return
 	}
 	client := rpc.NewURLServiceClient(conn)
@@ -27,10 +33,10 @@ func main() {
 	}
 	resp, err := client.GetHealthResponse(context.Background(), req)
 	if err != nil {
-		fmt.Printf("Could not process request %v", err)
+		logger.Error("Client", "Error", err.Error())
 		return
 	}
-
+	logger.Info("Client", "URL", url, "Response", resp.GetMessage())
 	fmt.Printf("%v\n", resp.GetMessage())
 
 }
