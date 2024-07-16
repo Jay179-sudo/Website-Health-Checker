@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	address := flag.String("address", "0.0.0.0:50050", "default port where the client reaches out to the server")
+	address := flag.String("address", "0.0.0.0:8080", "default port where the client reaches out to the server")
 	url := flag.String("url", "https://google.com", "The URL which the gRPC client sends the request to")
 	flag.Parse()
 
