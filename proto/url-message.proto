@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "jaypd/healthcheck/rpc";
+
+message URL{
+	string url = 1;
+}
+message URLResponse{
+	string message = 1;
+}
