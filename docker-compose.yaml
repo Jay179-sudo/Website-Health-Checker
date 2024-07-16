@@ -4,6 +4,18 @@ services:
     build: .
     ports:
       - 50050
+    volumes:
+      - type: bind
+        source: ./cert/server-cert.pem
+        target: /cert/server-cert.pem
+        read_only: true
+      - type: bind
+        source: ./cert/server-decrypted-key.pem
+        target: /cert/server-decrypted-key.pem
+        read_only: true
+      - type: bind
+        source: ./cert/ca-cert.pem
+        target: /cert/ca-cert.pem
   proxy:
     container_name: nginx-proxy
     image: nginx:latest
@@ -11,6 +23,18 @@ services:
       - type: bind
         source: ./proxy/nginx.conf
         target: /etc/nginx/conf.d/default.conf
+        read_only: true
+      - type: bind
+        source: ./cert/server-cert.pem
+        target: /cert/server-cert.pem
+        read_only: true
+      - type: bind
+        source: ./cert/server-decrypted-key.pem
+        target: /cert/server-decrypted-key.pem
+        read_only: true
+      - type: bind
+        source: ./cert/ca-cert.pem
+        target: /cert/ca-cert.pem
         read_only: true
     ports:
       - "8080:80"
