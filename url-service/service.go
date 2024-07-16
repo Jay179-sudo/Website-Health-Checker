@@ -17,6 +17,9 @@ type URLService struct {
 	rpc.UnimplementedURLServiceServer
 }
 
+func NewURLService() *URLService {
+	return &URLService{}
+}
 func getResponse(ctx context.Context, ch chan string, url string) {
 	start := time.Now()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
