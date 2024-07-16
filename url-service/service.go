@@ -51,7 +51,7 @@ func getResponse(ctx context.Context, ch chan string, url string) {
 		return
 	}
 
-	ch <- fmt.Sprintf("The %v URL has been processed in %v seconds", url, time.Since(start))
+	ch <- fmt.Sprintf("The %v URL has been processed in %v", url, time.Since(start))
 
 }
 func (u *URLService) GetHealthResponse(ctx context.Context, ur *rpc.URL) (*rpc.URLResponse, error) {
