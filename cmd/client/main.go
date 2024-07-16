@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"jaypd/healthcheck/rpc"
 	"log"
@@ -45,19 +44,22 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 }
 
 func main() {
-	address := flag.String("address", "0.0.0.0:8080", "default port where the client reaches out to the server")
-	enableTLS := flag.Bool("tls", true, "enable SSL/TLS")
-	url := flag.String("url", "https://google.com", "The URL which the gRPC client sends the request to")
-	flag.Parse()
+
+	address := os.Getenv("SERVER_ADDRESS")
+	enableTLS := true
+	url := os.Getenv("URL")
+	if url == "" {
+		url = "https://www.google.com"
+	}
 	transportOption := grpc.WithTransportCredentials(insecure.NewCredentials())
-	if *enableTLS {
+	if enableTLS {
 		tlsCreds, err := loadTLSCredentials()
 		if err != nil {
 			log.Fatal("cannot load TLS credentials ", err)
 		}
 		transportOption = grpc.WithTransportCredentials(tlsCreds)
 	}
-	conn, err := grpc.NewClient(*address, transportOption)
+	conn, err := grpc.NewClient(address, transportOption)
 	if err != nil {
 		logger.Error("Client", "Error", err.Error())
 		return
@@ -65,7 +67,7 @@ func main() {
 	client := rpc.NewURLServiceClient(conn)
 
 	req := &rpc.URL{
-		Url: *url,
+		Url: url,
 	}
 	resp, err := client.GetHealthResponse(context.Background(), req)
 	if err != nil {

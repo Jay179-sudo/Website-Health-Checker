@@ -3,7 +3,7 @@ services:
     container_name: task-processor
     build: .
     environment:
-      PORT: 50051
+      PORT: ${PORT}
     volumes:
       - type: bind
         source: ./cert/server-cert.pem
