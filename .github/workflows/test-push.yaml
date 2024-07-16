@@ -1,0 +1,23 @@
+name: test-push
+on:
+  push:
+    branches:
+      - main
+jobs:
+  application-test:
+    name: unit-coverage-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup GO Environment
+        uses: actions/setup-go@v5.0.1
+      
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Run Unit and Integration Tests
+        run: go test ./...
+      
+      - name: Run Code Coverage Analysis
+        run: go test -cover ./...
+        continue-on-error: true
+        
