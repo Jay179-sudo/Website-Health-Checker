@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"jaypd/healthcheck/rpc"
 	service "jaypd/healthcheck/url-service"
@@ -11,6 +10,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -45,15 +45,19 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 }
 
 func main() {
-	port := flag.Int("port", 50050, "The main gRPC process runs on port 500050 by default")
-	enableTLS := flag.Bool("tls", true, "enable SSL/TLS")
-	flag.Parse()
+	portAddr := os.Getenv("PORT")
+	port, err := strconv.Atoi(portAddr)
+	if err != nil {
+		logger.Error("Server", "Error", err)
+		port = 50050
+	}
+	enableTLS := true
 
-	address := fmt.Sprintf("0.0.0.0:%d", *port)
+	address := fmt.Sprintf("0.0.0.0:%d", port)
 
 	// load TLS configurations
 	serverOptions := []grpc.ServerOption{}
-	if *enableTLS {
+	if enableTLS {
 		tlsCredentials, err := loadTLSCredentials()
 		if err != nil {
 			log.Fatalf("Could not load TLS credentials %v", err)
