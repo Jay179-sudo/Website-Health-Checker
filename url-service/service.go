@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"jaypd/healthcheck/rpc"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -15,6 +17,10 @@ import (
 const (
 	URL_ERROR       = "the server could not process the url"
 	CONTEXT_TIMEOUT = "the request has timed out"
+)
+
+var (
+	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 )
 
 type URLService struct {
@@ -36,7 +42,7 @@ func getResponse(ctx context.Context, ch chan string, url string) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		ch <- "There was an error processing the URL"
+		ch <- URL_ERROR
 		return
 	}
 	// TODO perform a more robust check on the status code
@@ -50,13 +56,13 @@ func getResponse(ctx context.Context, ch chan string, url string) {
 }
 func (u *URLService) GetHealthResponse(ctx context.Context, ur *rpc.URL) (*rpc.URLResponse, error) {
 	// apply a 10 second timeout
-	fmt.Println("Received a URL Request")
+	logger.Info("/URLService/GetHealthResponse", "URL:", ur.Url)
 	parsedUrl, err := url.ParseRequestURI(ur.Url)
 	if err != nil {
+		logger.Error("/URLService/GetHealthResponse", "URL", ur.Url, "Code", codes.InvalidArgument, "Error Message", URL_ERROR)
 		return nil, status.Error(codes.InvalidArgument, URL_ERROR)
 	}
 	// TODO: add an option to change the number of times a request will be made
-	// TODO add structured logging using log/slog
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -68,11 +74,14 @@ func (u *URLService) GetHealthResponse(ctx context.Context, ur *rpc.URL) (*rpc.U
 	select {
 	case returnMessage = <-ch:
 		if returnMessage == URL_ERROR {
+			logger.Error("/URLService/GetHealthResponse", "URL", ur.Url, "Code", codes.Internal, "Error Message", URL_ERROR)
 			return nil, status.Error(codes.Internal, URL_ERROR)
 		}
 		resp.Message = returnMessage
+		logger.Info("/URLService/GetHealthResponse", "URL", ur.Url, "Message", returnMessage)
 		return resp, nil
 	case <-ctx.Done():
+		logger.Error("/URLService/GetHealthResponse", "URL", ur.Url, "Code", codes.DeadlineExceeded, "Error Message", CONTEXT_TIMEOUT)
 		return nil, status.Error(codes.DeadlineExceeded, CONTEXT_TIMEOUT)
 	}
 }
