@@ -4,7 +4,7 @@ A gRPC service that takes in a URL and performs a health check on it.
 clone the repository
 
 ```
-source ./change-urls.sh
+source ./docker.sh
 ```
 
 to execute a client
