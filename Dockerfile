@@ -5,7 +5,7 @@
 ##############################################
 
 
-FROM golang:alpine
+FROM golang:alpine AS BuildStage
 
 WORKDIR /app
 
@@ -18,7 +18,20 @@ RUN go install -v ./...
 WORKDIR /app/cmd/server
 RUN go build -o /go-docker
 
-CMD ["/go-docker"]
+
+#############################################
+
+# STEP 2 execute binary
+
+#############################################
+
+FROM alpine:latest
+
+WORKDIR /
+
+COPY --from=BuildStage /go-docker /go-docker
+
+ENTRYPOINT ["/go-docker"]
 
 
 
